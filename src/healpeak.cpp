@@ -4,15 +4,25 @@
 
 #include "healpeak.h"
 #include <healpix_cxx/healpix_base.h>
+#include <pybind11/stl.h>
 
 py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array::forcecast> maps,
-                              py::array_t<double, py::array::c_style | py::array::forcecast> bins) {
+                              py::array_t<double, py::array::c_style | py::array::forcecast> bins,
+                              std::optional<py::array_t<bool, py::array::c_style | py::array::forcecast>> mask) {
     if (maps.ndim() == 1)
         maps.resize({1, (int) maps.shape(0)});
 
     int nmaps = maps.shape(0);
     int npix = maps.shape(1);
     int nbins = bins.shape(0) - 1;
+
+    if (!mask) {
+        mask = py::array_t<bool>(npix);
+        bool *mask_data = (bool *) mask.value().request().ptr;
+        for (int i = 0; i < npix; ++i) {
+            mask_data[i] = true;
+        }
+    }
 
     auto peak_counts = py::array_t<long>({nmaps, nbins});
 
@@ -28,6 +38,9 @@ py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array
 
 #pragma omp parallel for
     for (int i = 0; i < npix; ++i) {
+        if (!mask.value().at(i))
+            continue;
+
         auto neighbors = fix_arr<int, 8>();
         map_base.neighbors(i, neighbors);
 
@@ -36,7 +49,7 @@ py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array
 
             bool is_peak = true;
             for (int k = 0; k < 8; ++k) {
-                if (neighbors[k] < 0)
+                if (neighbors[k] < 0 || !mask.value().at(neighbors[k]))
                     continue;
 
                 int ind_neighbor = neighbors[k] + j * npix;
@@ -61,13 +74,22 @@ py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array
 }
 
 py::array_t<long> void_counts(py::array_t<double, py::array::c_style | py::array::forcecast> maps,
-                              py::array_t<double, py::array::c_style | py::array::forcecast> bins) {
+                              py::array_t<double, py::array::c_style | py::array::forcecast> bins,
+                              std::optional<py::array_t<bool, py::array::c_style | py::array::forcecast>> mask) {
     if (maps.ndim() == 1)
         maps.resize({1, (int) maps.shape(0)});
 
     int nmaps = maps.shape(0);
     int npix = maps.shape(1);
     int nbins = bins.shape(0) - 1;
+
+    if (!mask) {
+        mask = py::array_t<bool>(npix);
+        bool *mask_data = (bool *) mask.value().request().ptr;
+        for (int i = 0; i < npix; ++i) {
+            mask_data[i] = true;
+        }
+    }
 
     auto void_counts = py::array_t<long>({nmaps, nbins});
 
@@ -83,6 +105,9 @@ py::array_t<long> void_counts(py::array_t<double, py::array::c_style | py::array
 
 # pragma omp parallel for
     for (int i = 0; i < npix; ++i) {
+        if (!mask.value().at(i))
+            continue;
+
         auto neighbors = fix_arr<int, 8>();
         map_base.neighbors(i, neighbors);
 
@@ -91,7 +116,7 @@ py::array_t<long> void_counts(py::array_t<double, py::array::c_style | py::array
 
             bool is_void = true;
             for (int k = 0; k < 8; ++k) {
-                if (neighbors[k] < 0)
+                if (neighbors[k] < 0 || !mask.value().at(neighbors[k]))
                     continue;
 
                 int ind_neighbor = neighbors[k] + j * npix;
