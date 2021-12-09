@@ -1,7 +1,5 @@
 import numpy as np
 import healpy as hp
-import sys
-sys.path.insert(0, '../build')
 import healpeak as hpk
 
 nside = 128
