@@ -26,6 +26,7 @@ py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array
         peak_count_data[i] = 0;
     }
 
+#pragma omp parallel for
     for (int i = 0; i < npix; ++i) {
         auto neighbors = fix_arr<int, 8>();
         map_base.neighbors(i, neighbors);
@@ -80,6 +81,7 @@ py::array_t<long> void_counts(py::array_t<double, py::array::c_style | py::array
         void_count_data[i] = 0;
     }
 
+# pragma omp parallel for
     for (int i = 0; i < npix; ++i) {
         auto neighbors = fix_arr<int, 8>();
         map_base.neighbors(i, neighbors);
