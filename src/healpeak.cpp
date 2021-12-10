@@ -49,11 +49,11 @@ py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array
 
             bool is_peak = true;
             for (int k = 0; k < 8; ++k) {
-                if (neighbors[k] < 0 || !mask.value().at(neighbors[k]))
+                if (neighbors[k] < 0)
                     continue;
 
                 int ind_neighbor = neighbors[k] + j * npix;
-                if (map_data[ind_pix] < map_data[ind_neighbor]) {
+                if (map_data[ind_pix] < map_data[ind_neighbor] || !mask.value().at(neighbors[k])) {
                     is_peak = false;
                     break;
                 }
@@ -116,11 +116,11 @@ py::array_t<long> void_counts(py::array_t<double, py::array::c_style | py::array
 
             bool is_void = true;
             for (int k = 0; k < 8; ++k) {
-                if (neighbors[k] < 0 || !mask.value().at(neighbors[k]))
+                if (neighbors[k] < 0)
                     continue;
 
                 int ind_neighbor = neighbors[k] + j * npix;
-                if (map_data[ind_pix] > map_data[ind_neighbor]) {
+                if (map_data[ind_pix] > map_data[ind_neighbor] || !mask.value().at(neighbors[k])) {
                     is_void = false;
                     break;
                 }
