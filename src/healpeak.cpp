@@ -62,7 +62,8 @@ py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array
             if (is_peak) {
                 for (int k = 0; k < nbins; ++k) {
                     if (map_data[ind_pix] >= bin_data[k] && map_data[ind_pix] < bin_data[k + 1]) {
-                        peak_count_data[k + j * nbins] += 1;
+#pragma omp atomic
+                        peak_count_data[k + j * nbins]++;
                         break;
                     }
                 }
@@ -129,7 +130,8 @@ py::array_t<long> void_counts(py::array_t<double, py::array::c_style | py::array
             if (is_void) {
                 for (int k = 0; k < nbins; ++k) {
                     if (map_data[ind_pix] >= bin_data[k] && map_data[ind_pix] < bin_data[k + 1]) {
-                        void_count_data[k + j * nbins] += 1;
+#pragma omp atomic
+                        void_count_data[k + j * nbins]++;
                         break;
                     }
                 }
