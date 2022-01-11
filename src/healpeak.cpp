@@ -27,7 +27,7 @@ py::array_t<long> peak_counts(py::array_t<double, py::array::c_style | py::array
     auto peak_counts = py::array_t<long>({nmaps, nbins});
 
     int nside = Healpix_Base::npix2nside(npix);
-    auto map_base = Healpix_Base(nside, NEST, SET_NSIDE);
+    auto map_base = Healpix_Base(nside, RING, SET_NSIDE);
 
     double *map_data = (double *) maps.request().ptr;
     double *bin_data = (double *) bins.request().ptr;
@@ -95,7 +95,7 @@ py::array_t<long> void_counts(py::array_t<double, py::array::c_style | py::array
     auto void_counts = py::array_t<long>({nmaps, nbins});
 
     int nside = Healpix_Base::npix2nside(npix);
-    auto map_base = Healpix_Base(nside, NEST, SET_NSIDE);
+    auto map_base = Healpix_Base(nside, RING, SET_NSIDE);
 
     double *map_data = (double *) maps.request().ptr;
     double *bin_data = (double *) bins.request().ptr;
